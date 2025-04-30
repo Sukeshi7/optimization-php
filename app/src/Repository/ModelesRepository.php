@@ -15,6 +15,19 @@ class ModelesRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Modeles::class);
     }
+	
+	public function findWithFilesById($id)
+	{
+		return $this->createQueryBuilder('m')
+				->leftJoin('m.modelesFiles', 'mf')
+				->addSelect('mf')
+				->leftJoin('mf.directusFiles', 'df')
+				->addSelect('df')
+				->where('m.id = :id')
+				->setParameter('id', $id)
+				->getQuery()
+				->getOneOrNullResult();
+	}
 
     //    /**
     //     * @return Modeles[] Returns an array of Modeles objects
@@ -40,4 +53,6 @@ class ModelesRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+	
+	
 }

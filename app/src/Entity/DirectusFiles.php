@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use App\Repository\DirectusFilesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+
 
 #[ORM\Entity(repositoryClass: DirectusFilesRepository::class)]
 class DirectusFiles
@@ -86,8 +89,16 @@ class DirectusFiles
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $uploaded_on = null;
-
-    public function getId(): ?string
+	
+	#[ORM\OneToMany(mappedBy: "directusFiles", targetEntity: ModelesFiles::class)]
+	private Collection $modelesFiles;
+	
+	public function __construct()
+	{
+		$this->modelesFiles = new ArrayCollection();
+	}
+	
+	public function getId(): ?string
     {
         return $this->id;
     }
@@ -108,4 +119,28 @@ class DirectusFiles
     {
         return $this->filename_disk;
     }
+	
+	public function getModelesFiles(): Collection
+	{
+		return $this->modelesFiles;
+	}
+	
+	public function addModelesFile(ModelesFiles $modelesFile): static
+	{
+		if (!$this->modelesFiles->contains($modelesFile)) {
+			$this->modelesFiles[] = $modelesFile;
+			$modelesFile->setDirectusFiles($this);
+		}
+		return $this;
+	}
+	
+	public function removeModelesFile(ModelesFiles $modelesFile): static
+	{
+		if ($this->modelesFiles->removeElement($modelesFile)) {
+			if ($modelesFile->getDirectusFiles() === $this) {
+				$modelesFile->setDirectusFiles(null);
+			}
+		}
+		return $this;
+	}
 }

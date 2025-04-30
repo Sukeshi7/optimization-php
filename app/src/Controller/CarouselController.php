@@ -12,34 +12,43 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class CarouselController extends AbstractController
 {
-    #[Route('/carousel', name: 'app_carousel')]
-    public function index(GalaxyRepository $galaxyRepository, ModelesRepository $modelesRepository, ModelesFilesRepository $modelesFilesRepository, DirectusFilesRepository $directusFilesRepository): Response
-    {
-        $galaxies = $galaxyRepository->findAll();
-        $carousel = [];
+	#[Route('/carousel', name: 'app_carousel')]
+	public function index(
+			GalaxyRepository $galaxyRepository,
+			ModelesRepository $modelesRepository,
+			ModelesFilesRepository $modelesFilesRepository,
+			DirectusFilesRepository $directusFilesRepository
+	): Response
+	{
+		$galaxies = $galaxyRepository->findAll();
+		$carousel = [];
+		
+		foreach ($galaxies as $galaxy) {
+			$carouselItem = [
+					'title' => $galaxy->getTitle(),
+					'description' => $galaxy->getDescription(),
+			];
+			
+			$modele = $modelesRepository->findWithFilesById($galaxy->getModele());
+			
+			if (!$modele) {
+				continue;
+			}
+			
+			$files = [];
+			foreach ($modele->getModelesFiles() as $modelesFile) {
+				$file = $modelesFile->getDirectusFiles();
+				if ($file) {
+					$files[] = $file;
+				}
+			}
+			
+			$carouselItem['files'] = $files;
+			$carousel[] = $carouselItem;
+		}
 
-        foreach($galaxies as $galaxy) {
-            $carouselItem = [
-                'title' => $galaxy->getTitle(),
-                'description' => $galaxy->getDescription(),
-            ];
-            
-            $modele = $modelesRepository->find($galaxy->getModele());
-            $modelesFiles = $modelesFilesRepository->findBy([
-                'modeles_id' => $modele->getId()
-            ]);
-            $files = [];
-
-            foreach($modelesFiles as $modelesFile) {
-                $file = $directusFilesRepository->find($modelesFile->getDirectusFilesId());
-                $files[] = $file;
-            }
-            $carouselItem['files'] = $files;
-            $carousel[] = $carouselItem;
-        }
-        
-        return $this->render('carousel/index.html.twig', [
-            'carousel' => $carousel
-        ]);
-    }
+		return $this->render('carousel/index.html.twig', [
+				'carousel' => $carousel
+		]);
+	}
 }

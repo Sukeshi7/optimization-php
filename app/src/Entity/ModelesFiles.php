@@ -11,39 +11,40 @@ class ModelesFiles
     #[ORM\Id]
     #[ORM\Column]
     private ?string $id = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $modeles_id = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $directus_files_id = null;
-
-    public function getId(): ?string
+	
+	#[ORM\ManyToOne(targetEntity: Modeles::class, inversedBy: "modelesFiles")]
+	#[ORM\JoinColumn(name: "modeles_id", referencedColumnName: "id")]
+	private ?Modeles $modeles = null;
+	
+	#[ORM\ManyToOne(targetEntity: DirectusFiles::class)]
+	#[ORM\JoinColumn(name: "directus_files_id", referencedColumnName: "id")]
+	private ?DirectusFiles $directusFiles = null;
+	
+	
+	public function getId(): ?string
     {
         return $this->id;
     }
-
-    public function getModelesId(): ?string
-    {
-        return $this->modeles_id;
-    }
-
-    public function setModelesId(string $modeles_id): static
-    {
-        $this->modeles_id = $modeles_id;
-
-        return $this;
-    }
-
-    public function getDirectusFilesId(): ?string
-    {
-        return $this->directus_files_id;
-    }
-
-    public function setDirectusFilesId(string $directus_files_id): static
-    {
-        $this->directus_files_id = $directus_files_id;
-
-        return $this;
-    }
+	
+	public function getModeles(): ?Modeles
+	{
+		return $this->modeles;
+	}
+	
+	public function setModeles(?Modeles $modeles): static
+	{
+		$this->modeles = $modeles;
+		return $this;
+	}
+	
+	public function getDirectusFiles(): ?DirectusFiles
+	{
+		return $this->directusFiles;
+	}
+	
+	public function setDirectusFiles(?DirectusFiles $directusFiles): static
+	{
+		$this->directusFiles = $directusFiles;
+		return $this;
+	}
 }
